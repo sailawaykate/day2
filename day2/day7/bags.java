@@ -86,6 +86,7 @@ public class bags {
         ArrayList<String> colors = new ArrayList<>();
         colors.add(myBag);
 
+        //test change
         for (int i = 0; i < colors.size(); i++) {
             int oldSize = colors.size();
             colors.addAll(containsMyBag(colors, list));
