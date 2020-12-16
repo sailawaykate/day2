@@ -3,7 +3,6 @@ package day12;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Scanner;
 
 import static java.lang.Math.abs;
@@ -11,15 +10,7 @@ import static java.lang.Math.abs;
 public class ferry {
 
    /*
-    Action N means to move north by the given value.
-    Action S means to` move south by the given value.
-    Action E means to move east by the given value.
-    Action W means to move west by the given value.
-    Action L means to turn left the given number of degrees.
-    Action R means to turn right the given number of degrees.
-    Action F means to` move forward by the given value in the direction the ship is currently facing.
-
-    The ship starts by facing east. Only the L and R actions change the direction the ship is facing.
+    The ship starts by facing east.
 
     Action N means to move the waypoint north by the given value.
     Action S means to move the waypoint south by the given value.
@@ -31,27 +22,69 @@ public class ferry {
     The waypoint starts 10 units east and 1 unit north relative to the ship. The waypoint is relative to the ship;
     that is, if the ship moves, the waypoint moves with it.
     */
-    public static String turn(String start, int turns) {
-        HashMap<Integer, String> rotations = new HashMap<>();
-        rotations.put(0, "N");
-        rotations.put(1, "E");
-        rotations.put(2, "S");
-        rotations.put(3, "W");
-        HashMap<String, Integer> directions = new HashMap<>();
-        directions.put("N", 0);
-        directions.put("E", 1);
-        directions.put("S", 2);
-        directions.put("W", 3);
+    public static int[] turnLeft(int EW, int NS, int turns) {
+        // if ew is -10 & turns 90degrees right, ns becomes -10
+        // if ew is -10 & turns 90degrees left, ns becomes 10
+        int newEW = 0;
+        int newNS = 0;
 
-        int newOrientation = directions.get(start) + turns;
-        while (newOrientation > 3) {
-            newOrientation = newOrientation - 4;
+        if (turns == 1) {
+            // EW & NS flip places & negatives
+            newNS = EW * -1;
+            newEW = NS;
         }
-        while (newOrientation < 0) {
-            newOrientation = newOrientation + 4;
+        if (turns == 2) {
+            // EW & NS flip negatives
+            newEW = EW * -1;
+            newNS = NS * -1;
         }
+        if (turns == 3) {
+            // EW & NS flip places
+            newEW = NS;
+            newNS = EW * -1;
+        }
+        if (turns == 4 || turns == 0) {
+            // no change
+            newEW = EW;
+            newNS = NS;
+        }
+        int[] newOrientation = new int[2];
+        newOrientation[0] = newEW;
+        newOrientation[1] = newNS;
 
-        return rotations.get(newOrientation);
+        return newOrientation;
+    }
+
+    public static int[] turnRight(int EW, int NS, int turns) {
+        // if ew is -10 & turns 90degrees right, ns becomes -10
+        int newEW = 0;
+        int newNS = 0;
+
+        if (turns == 1) {
+            // EW & NS flip places
+            newNS = EW;
+            newEW = NS * -1;
+        }
+        if (turns == 2) {
+            // EW & NS flip negatives
+            newEW = EW * -1;
+            newNS = NS * -1;
+        }
+        if (turns == 3) {
+            // EW & NS flip places
+            newEW = NS * -1;
+            newNS = EW;
+        }
+        if (turns == 4 || turns == 0) {
+            // no change
+            newEW = EW;
+            newNS = NS;
+        }
+        int[] newOrientation = new int[2];
+        newOrientation[0] = newEW;
+        newOrientation[1] = newNS;
+
+        return newOrientation;
     }
 
     public static void main(String... args) throws FileNotFoundException {
@@ -64,42 +97,55 @@ public class ferry {
             input.add(line);
         }
 
-        int EW = 10;
-        int NS = -1;
-        String currentlyFacing = "E";
+        int waypointEW = 10;
+        int waypointNS = -1;
+        int shipEW = 0;
+        int shipNS = 0;
 
         for (String direction: input) {
             String action = String.valueOf(direction.charAt(0));
             int number = Integer.parseInt(direction.replace(action, ""));
-            if (action.equals("F")) {
-                action = currentlyFacing;
-            }
             switch (action) {
-                //Action N means to move the waypoint north by the given value.
-                case "N" -> NS = NS - number;
-                case "S" -> NS = NS + number;
-                case "E" -> EW = EW + number;
-                case "W" -> EW = EW - number;
+                //Action N/S/E/W means to move the waypoint north by the given value.
+                case "N" -> waypointNS = waypointNS - number;
+                case "S" -> waypointNS = waypointNS + number;
+                case "E" -> waypointEW = waypointEW + number;
+                case "W" -> waypointEW = waypointEW - number;
+                //Action L/R means to rotate the waypoint around the ship left or right the given number of degrees
                 case "L" -> {
+                    // get current waypoint EW/NS position
                     int turns = abs(number / 90);
                     while (turns > 3) {
                         turns = turns - 4;
                     }
-                    currentlyFacing = turn(currentlyFacing, turns * -1);
+                    int[] waypoint = turnLeft(waypointEW, waypointNS, turns);
+                    waypointEW = waypoint[0];
+                    waypointNS = waypoint[1];
                 }
                 case "R" -> {
+                    // get current waypoint EW/NS position
                     int turns = abs(number / 90);
                     while (turns > 3) {
                         turns = turns - 4;
                     }
-                    currentlyFacing = turn(currentlyFacing, turns);
+                    int[] waypoint = turnRight(waypointEW, waypointNS, turns);
+                    waypointEW = waypoint[0];
+                    waypointNS = waypoint[1];
+                }
+                //Action F means to move forward to the waypoint a number of times equal to the given value
+                case "F" -> {
+                    // get diff between ship & waypoint for EW/NS
+                    for (int i = 0; i < number; i++) {
+                        shipNS = shipNS + waypointNS;
+                        shipEW = shipEW + waypointEW;
+                    }
                 }
             }
         }
         System.out.println(input);
-        System.out.println("East/West: " + EW);
-        System.out.println("North/South: " + NS);
-        long sum = abs(EW) + abs(NS);
+        System.out.println("East/West: " + shipEW);
+        System.out.println("North/South: " + shipNS);
+        long sum = abs(shipEW) + abs(shipNS);
         System.out.println("Answer: " + sum);
     }
 }
