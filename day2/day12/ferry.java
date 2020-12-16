@@ -40,7 +40,7 @@ public class ferry {
         }
         if (turns == 3) {
             // EW & NS flip places
-            newEW = NS;
+            newEW = NS * -1;
             newNS = EW * -1;
         }
         if (turns == 4 || turns == 0) {
@@ -61,19 +61,16 @@ public class ferry {
         int newNS = 0;
 
         if (turns == 1) {
-            // EW & NS flip places
             newNS = EW;
             newEW = NS * -1;
         }
         if (turns == 2) {
-            // EW & NS flip negatives
             newEW = EW * -1;
             newNS = NS * -1;
         }
         if (turns == 3) {
-            // EW & NS flip places
             newEW = NS * -1;
-            newNS = EW;
+            newNS = EW * -1;
         }
         if (turns == 4 || turns == 0) {
             // no change
