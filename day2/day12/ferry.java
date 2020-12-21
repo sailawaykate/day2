@@ -94,20 +94,33 @@ public class ferry {
             input.add(line);
         }
 
-        int waypointEW = 10;
-        int waypointNS = -1;
+        int waypointEW = -1;
+        int waypointNS = -10;
         int shipEW = 0;
         int shipNS = 0;
 
         for (String direction: input) {
+            System.out.println(direction);
             String action = String.valueOf(direction.charAt(0));
             int number = Integer.parseInt(direction.replace(action, ""));
             switch (action) {
                 //Action N/S/E/W means to move the waypoint north by the given value.
-                case "N" -> waypointNS = waypointNS - number;
-                case "S" -> waypointNS = waypointNS + number;
-                case "E" -> waypointEW = waypointEW + number;
-                case "W" -> waypointEW = waypointEW - number;
+                case "N" -> {
+                    waypointNS = waypointNS - number;
+                    System.out.println("Moving waypoint " + number + " units N");
+                }
+                case "S" -> {
+                    waypointNS = waypointNS + number;
+                    System.out.println("Moving waypoint " + number + " units S");
+                }
+                case "E" -> {
+                    waypointEW = waypointEW + number;
+                    System.out.println("Moving waypoint " + number + " units E");
+                }
+                case "W" -> {
+                    waypointEW = waypointEW - number;
+                    System.out.println("Moving waypoint " + number + " units W");
+                }
                 //Action L/R means to rotate the waypoint around the ship left or right the given number of degrees
                 case "L" -> {
                     // get current waypoint EW/NS position
@@ -116,8 +129,10 @@ public class ferry {
                         turns = turns - 4;
                     }
                     int[] waypoint = turnLeft(waypointEW, waypointNS, turns);
+                    System.out.print("Moved waypoint from " + waypointEW + ", " + waypointNS + " to ");
                     waypointEW = waypoint[0];
                     waypointNS = waypoint[1];
+                    System.out.println(waypointEW + ", " + waypointNS);
                 }
                 case "R" -> {
                     // get current waypoint EW/NS position
@@ -126,8 +141,10 @@ public class ferry {
                         turns = turns - 4;
                     }
                     int[] waypoint = turnRight(waypointEW, waypointNS, turns);
+                    System.out.print("Moved waypoint from " + waypointEW + ", " + waypointNS + " to ");
                     waypointEW = waypoint[0];
                     waypointNS = waypoint[1];
+                    System.out.println(waypointEW + ", " + waypointNS);
                 }
                 //Action F means to move forward to the waypoint a number of times equal to the given value
                 case "F" -> {
@@ -135,11 +152,12 @@ public class ferry {
                     for (int i = 0; i < number; i++) {
                         shipNS = shipNS + waypointNS;
                         shipEW = shipEW + waypointEW;
+
                     }
+                    System.out.println("Moving ship " + shipEW + " units EW and " + shipNS + " units NS");
                 }
             }
         }
-        System.out.println(input);
         System.out.println("East/West: " + shipEW);
         System.out.println("North/South: " + shipNS);
         long sum = abs(shipEW) + abs(shipNS);
